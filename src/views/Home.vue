@@ -30,7 +30,7 @@ function selectBodyPart(part) {
 }
 
 onMounted(async () => {
-  const res = await fetch('/body.svg')
+  const res = await fetch(import.meta.env.BASE_URL + 'body.svg')
   let svg = await res.text()
 
   let overlay = '\n<g id="opencode-overlay" style="pointer-events:all">\n'

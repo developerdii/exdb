@@ -18,12 +18,18 @@ const equipmentOptions = computed(() =>
 )
 
 const selectedEquipment = ref(route.query.equipment || '')
+const searchQuery = ref('')
 
-const filteredExercises = computed(() =>
-  selectedEquipment.value
+const filteredExercises = computed(() => {
+  let result = selectedEquipment.value
     ? filteredByPart.value.filter(e => e.equipment === selectedEquipment.value)
     : filteredByPart.value
-)
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(e => e.name.toLowerCase().includes(q) || e.target.toLowerCase().includes(q))
+  }
+  return result
+})
 
 function selectEquipment(eq) {
   selectedEquipment.value = eq
@@ -55,6 +61,15 @@ function goBack() {
       >
         {{ eq }}
       </button>
+    </div>
+
+    <div class="search-bar">
+      <input
+        v-model="searchQuery"
+        type="text"
+        class="search-input"
+        placeholder="Search exercises..."
+      />
     </div>
 
     <div class="grid" v-if="filteredExercises.length">
@@ -93,8 +108,23 @@ h1 {
 .filters {
   display: flex;
   gap: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
+}
+.search-bar {
+  margin-bottom: 20px;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus {
+  border-color: #4a90d9;
 }
 .filter-btn {
   padding: 8px 16px;

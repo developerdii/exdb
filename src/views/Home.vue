@@ -4,18 +4,9 @@ import { useRouter } from 'vue-router'
 import { useLocale } from '../composables/useLocale'
 
 const router = useRouter()
-const { locale, setLocale, t } = useLocale()
+const { locale, t } = useLocale()
 const svgContent = ref('')
 const hoveredPart = ref(null)
-
-const languages = [
-  { code: 'en', flag: '🇬🇧', name: 'EN' },
-  { code: 'it', flag: '🇮🇹', name: 'IT' },
-  { code: 'tr', flag: '🇹🇷', name: 'TR' },
-  { code: 'es', flag: '🇪🇸', name: 'ES' },
-  { code: 'ru', flag: '🇷🇺', name: 'RU' },
-  { code: 'zh', flag: '🇨🇳', name: 'ZH' },
-]
 
 const zones = [
   { key: 'chest', labelKey: 'chest', x: 65, y: 50, w: 75, h: 60 },
@@ -76,12 +67,6 @@ watch(locale, () => {
 
 <template>
   <div class="home">
-    <div class="top-bar">
-      <span class="brand">ExDB</span>
-      <select v-model="locale" @change="setLocale(locale)" class="lang-select">
-        <option v-for="l in languages" :key="l.code" :value="l.code">{{ l.flag }} {{ l.name }}</option>
-      </select>
-    </div>
     <h1>{{ t('selectBodyPart') }}</h1>
     <div class="body-map">
       <div class="svg-wrap" v-html="svgContent"></div>
@@ -93,27 +78,6 @@ watch(locale, () => {
 .home {
   text-align: center;
   padding: 20px;
-  min-height: 100vh;
-}
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.brand {
-  font-size: 20px;
-  font-weight: 800;
-  color: #4a90d9;
-  letter-spacing: 1px;
-}
-.lang-select {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
 }
 h1 {
   margin-bottom: 20px;

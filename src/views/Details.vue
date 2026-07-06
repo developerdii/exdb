@@ -12,6 +12,10 @@ const exercise = exercises.find(e => e.id === props.id)
 function goBack() {
   router.back()
 }
+
+function viewTag(tag) {
+  router.push({ name: 'TagList', params: { tag } })
+}
 </script>
 
 <template>
@@ -19,10 +23,10 @@ function goBack() {
     <button class="back" @click="goBack">&larr; {{ t('back') }}</button>
     <h1>{{ exercise.name }}</h1>
 
-    <p class="tags">
-      <span>{{ exercise.body_part }}</span>
-      <span>{{ exercise.equipment }}</span>
-      <span>{{ exercise.target }}</span>
+    <p class="toptags">
+      <span class="toptag tlink" @click="router.push({ name: 'ExerciseList', params: { bodyPart: exercise.body_part } })">{{ exercise.body_part }}</span>
+      <span class="toptag tlink" @click="viewTag(exercise.equipment)">{{ exercise.equipment }}</span>
+      <span class="toptag tlink" @click="viewTag(exercise.target)">{{ exercise.target }}</span>
     </p>
 
     <h3>{{ t('instructions') }}</h3>
@@ -34,8 +38,12 @@ function goBack() {
     </ol>
 
     <h3>{{ t('muscles') }}</h3>
-    <p><strong>{{ t('primary') }}:</strong> {{ exercise.muscle_group }}</p>
-    <p v-if="exercise.secondary_muscles.length"><strong>{{ t('secondary') }}:</strong> {{ exercise.secondary_muscles.join(', ') }}</p>
+    <p><strong>{{ t('primary') }}:</strong> <span class="tlink" @click="viewTag(exercise.muscle_group)">{{ exercise.muscle_group }}</span></p>
+    <p v-if="exercise.secondary_muscles.length"><strong>{{ t('secondary') }}:</strong>
+      <template v-for="(sm, i) in exercise.secondary_muscles" :key="sm">
+        <span class="tlink" @click="viewTag(sm)">{{ sm }}</span>{{ i < exercise.secondary_muscles.length - 1 ? ', ' : '' }}
+      </template>
+    </p>
   </div>
   <div v-else class="not-found">
     <h1>{{ t('notFound') }}</h1>
@@ -61,17 +69,27 @@ h1 {
   text-transform: capitalize;
   margin-bottom: 12px;
 }
-.tags {
+.toptags {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
 }
-.tags span {
+.toptag {
   background: #f0f0f0;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 13px;
   text-transform: capitalize;
+}
+.tlink {
+  background: #e8f0fe;
+  color: #4a90d9;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tlink:hover {
+  background: #4a90d9;
+  color: white;
 }
 .instructions {
   line-height: 1.6;

@@ -6,6 +6,7 @@ import Details from '../views/Details.vue'
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/exercises/:bodyPart?', name: 'ExerciseList', component: ExerciseList, props: true },
+  { path: '/tag/:tag', name: 'TagList', component: ExerciseList, props: true },
   { path: '/exercise/:id', name: 'Details', component: Details, props: true },
 ]
 

@@ -1,24 +1,40 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLocale } from '../composables/useLocale'
 import exercises from '../data/exercises.json'
 
-const props = defineProps({ bodyPart: { type: String, default: '' } })
+const props = defineProps({
+  bodyPart: { type: String, default: '' },
+  tag: { type: String, default: '' },
+})
 const router = useRouter()
 const route = useRoute()
 const { t } = useLocale()
 
-const filteredByPart = computed(() =>
-  exercises.filter(e => e.body_part === props.bodyPart)
-)
+const searchQuery = ref('')
+
+const filteredByPart = computed(() => {
+  if (props.tag) {
+    return exercises.filter(e =>
+      e.target === props.tag ||
+      e.muscle_group === props.tag ||
+      e.equipment === props.tag ||
+      e.body_part === props.tag ||
+      (e.secondary_muscles && e.secondary_muscles.includes(props.tag))
+    )
+  }
+  if (props.bodyPart) {
+    return exercises.filter(e => e.body_part === props.bodyPart)
+  }
+  return exercises
+})
 
 const equipmentOptions = computed(() =>
   [...new Set(filteredByPart.value.map(e => e.equipment))]
 )
 
 const selectedEquipment = ref(route.query.equipment || '')
-const searchQuery = ref('')
 
 const filteredExercises = computed(() => {
   let result = selectedEquipment.value
@@ -29,6 +45,15 @@ const filteredExercises = computed(() => {
     result = result.filter(e => e.name.toLowerCase().includes(q) || e.target.toLowerCase().includes(q))
   }
   return result
+})
+
+const pageTitle = computed(() => {
+  if (props.tag) return `${props.tag} ${t('exercises')}`
+  return `${props.bodyPart} ${t('exercises')}`
+})
+
+watch(() => route.query.equipment, (val) => {
+  selectedEquipment.value = val || ''
 })
 
 function selectEquipment(eq) {
@@ -42,6 +67,11 @@ function viewDetails(id) {
   router.push({ name: 'Details', params: { id } })
 }
 
+function viewTag(tag) {
+  if (!tag) return
+  router.push({ name: 'TagList', params: { tag } })
+}
+
 function goBack() {
   router.push({ name: 'Home' })
 }
@@ -50,9 +80,9 @@ function goBack() {
 <template>
   <div class="list">
     <button class="back" @click="goBack">&larr; {{ t('back') }}</button>
-    <h1>{{ props.bodyPart }} {{ t('exercises') }}</h1>
+    <h1>{{ pageTitle }}</h1>
 
-    <div class="filters" v-if="equipmentOptions.length">
+    <div class="filters" v-if="equipmentOptions.length && props.bodyPart">
       <button
         v-for="eq in equipmentOptions"
         :key="eq"
@@ -80,7 +110,10 @@ function goBack() {
         @click="viewDetails(ex.id)"
       >
         <h3>{{ ex.name }}</h3>
-        <p class="meta">{{ ex.equipment }} &middot; {{ ex.target }}</p>
+        <div class="tags">
+          <span class="tag" @click.stop="viewTag(ex.target)">{{ ex.target }}</span>
+          <span class="tag tag-alt" @click.stop="viewTag(ex.muscle_group)">{{ ex.muscle_group }}</span>
+        </div>
       </div>
     </div>
     <p v-else class="empty">{{ t('noResults') }}</p>
@@ -111,6 +144,20 @@ h1 {
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all 0.2s;
+}
+.filter-btn.active {
+  background: #4a90d9;
+  color: white;
+  border-color: #4a90d9;
+}
 .search-bar {
   margin-bottom: 20px;
 }
@@ -124,20 +171,6 @@ h1 {
   transition: border-color 0.2s;
 }
 .search-input:focus {
-  border-color: #4a90d9;
-}
-.filter-btn {
-  padding: 8px 16px;
-  border: 2px solid #ddd;
-  border-radius: 20px;
-  background: white;
-  cursor: pointer;
-  text-transform: capitalize;
-  transition: all 0.2s;
-}
-.filter-btn.active {
-  background: #4a90d9;
-  color: white;
   border-color: #4a90d9;
 }
 .grid {
@@ -155,13 +188,35 @@ h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .card h3 {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   text-transform: capitalize;
 }
-.meta {
-  margin: 0;
-  color: #777;
-  font-size: 14px;
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag {
+  background: #e8f0fe;
+  color: #4a90d9;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 0.15s;
+}
+.tag:hover {
+  background: #4a90d9;
+  color: white;
+}
+.tag-alt {
+  background: #f0e8f8;
+  color: #7c5cbf;
+}
+.tag-alt:hover {
+  background: #7c5cbf;
+  color: white;
 }
 .empty {
   text-align: center;

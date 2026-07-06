@@ -1,17 +1,16 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useTraining } from '../composables/useTraining'
-import exercises from '../data/exercises.json'
 
 const router = useRouter()
 const { trainingDays, days, removeDay, removeExerciseFromDay } = useTraining()
 
-function getExerciseById(id) {
-  return exercises.find(e => e.id === id)
-}
-
 function goBack() {
   router.push('/')
+}
+
+function getDayLabel(dayValue) {
+  return days.find(d => d.value === dayValue)?.label || dayValue
 }
 </script>
 
@@ -20,26 +19,30 @@ function goBack() {
     <button class="back" @click="goBack">&larr; Back</button>
     <h1>Training Program</h1>
 
-    <div v-if="trainingDays.length" class="days-grid">
-      <div v-for="day in trainingDays" :key="day.id" class="day-card">
-        <div class="card-header">
-          <div>
+    <div v-if="trainingDays.length" class="days-list">
+      <div v-for="day in trainingDays" :key="day.id" class="day-block">
+        <div class="day-tag">
+          <span class="dot"></span>
+          <span class="label">{{ getDayLabel(day.day).substring(0, 3) }}</span>
+        </div>
+        <div class="day-info">
+          <div class="day-header">
             <h2>{{ day.name }}</h2>
-            <span class="day-label">{{ days.find(d => d.value === day.day)?.label }}</span>
+            <span class="day-full-label">{{ getDayLabel(day.day) }}</span>
+            <button class="btn-remove" @click="removeDay(day.id)" title="Remove">×</button>
           </div>
-          <button class="btn-remove" @click="removeDay(day.id)" title="Remove day">×</button>
-        </div>
-        <div class="card-exercises" v-if="day.exercises.length">
-          <div v-for="ex in day.exercises" :key="ex.exerciseId" class="exercise-row">
-            <span class="order">{{ ex.order }}</span>
-            <span class="ex-name">{{ ex.name }}</span>
-            <button class="btn-remove-ex" @click="removeExerciseFromDay(day.id, ex.exerciseId)">×</button>
+          <div class="exercises" v-if="day.exercises.length">
+            <div v-for="ex in day.exercises" :key="ex.exerciseId" class="ex-row">
+              <span class="order">{{ ex.order }}</span>
+              <span class="ex-name">{{ ex.name }}</span>
+              <button class="btn-rm-ex" @click="removeExerciseFromDay(day.id, ex.exerciseId)">×</button>
+            </div>
           </div>
+          <div v-else class="no-ex">No exercises added</div>
         </div>
-        <div v-else class="card-empty">No exercises added</div>
       </div>
     </div>
-    <div v-else class="empty-state">
+    <div v-else class="empty">
       <p>No training days yet.</p>
       <p>Click the program button in the navbar to create your first training day.</p>
     </div>
@@ -49,7 +52,7 @@ function goBack() {
 <style scoped>
 .training-page {
   padding: 20px;
-  max-width: 900px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .back {
@@ -61,63 +64,94 @@ function goBack() {
   padding: 8px 0;
 }
 h1 {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-.days-grid {
-  display: grid;
+.days-list {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
-.day-card {
+.day-block {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.day-tag {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #4a90d9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+  margin-bottom: 2px;
+}
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+}
+.day-info {
+  flex: 1;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   overflow: hidden;
 }
-.card-header {
+.day-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
+  gap: 8px;
+  padding: 12px 16px;
   background: #fafafa;
   border-bottom: 1px solid #eee;
 }
-.card-header h2 {
+.day-header h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
 }
-.day-label {
+.day-full-label {
   font-size: 12px;
   color: #999;
 }
 .btn-remove {
+  margin-left: auto;
   background: none;
   border: none;
   color: #ccc;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
 }
 .btn-remove:hover {
   color: #e44;
 }
-.card-exercises {
-  padding: 8px 18px 12px;
+.exercises {
+  padding: 8px 16px 12px;
 }
-.exercise-row {
+.ex-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 0;
   border-bottom: 1px solid #f5f5f5;
 }
-.exercise-row:last-child {
+.ex-row:last-child {
   border-bottom: none;
 }
 .order {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #4a90d9;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -129,23 +163,23 @@ h1 {
   text-transform: capitalize;
   font-size: 14px;
 }
-.btn-remove-ex {
+.btn-rm-ex {
   background: none;
   border: none;
   color: #ccc;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
 }
-.btn-remove-ex:hover {
+.btn-rm-ex:hover {
   color: #e44;
 }
-.card-empty {
-  padding: 14px 18px;
+.no-ex {
+  padding: 12px 16px;
   color: #bbb;
   font-size: 13px;
   font-style: italic;
 }
-.empty-state {
+.empty {
   text-align: center;
   color: #999;
   padding: 40px 0;

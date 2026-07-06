@@ -29,6 +29,7 @@ watch(trainingDays, (val) => {
 
 export function useTraining() {
   function addDay(dayValue, name) {
+    if (trainingDays.value.find(d => d.day === dayValue)) return
     const id = Date.now().toString(36)
     trainingDays.value.push({ id, day: dayValue, name, exercises: [] })
   }

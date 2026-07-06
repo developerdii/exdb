@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLocale } from '../composables/useLocale'
 import { useTraining } from '../composables/useTraining'
 
 const props = defineProps({
@@ -11,19 +10,28 @@ const props = defineProps({
 const emit = defineEmits(['close', 'added'])
 
 const router = useRouter()
-const { t } = useLocale()
 const { trainingDays, days, addDay, removeDay, addExerciseToDay, removeExerciseFromDay } = useTraining()
 
-const showAddDay = ref(false)
-const newDayName = ref('')
-const selectedDay = ref('monday')
-const showDayPicker = ref(false)
+const editingDay = ref(null)
+const newName = ref('')
 
-function handleAddDay() {
-  if (!newDayName.value.trim()) return
-  addDay(selectedDay.value, newDayName.value.trim())
-  newDayName.value = ''
-  showAddDay.value = false
+const configuredDays = computed(() => {
+  return days.map(d => {
+    const existing = trainingDays.value.find(td => td.day === d.value)
+    return { ...d, configured: !!existing, trainingDay: existing }
+  })
+})
+
+function startEditing(day) {
+  editingDay.value = day.value
+  newName.value = ''
+}
+
+function saveDay(day) {
+  if (!newName.value.trim()) return
+  addDay(day.value, newName.value.trim())
+  editingDay.value = null
+  newName.value = ''
 }
 
 function handleAddExercise(dayId) {
@@ -32,8 +40,9 @@ function handleAddExercise(dayId) {
   emit('added')
 }
 
-function handleRemoveDay(id) {
-  removeDay(id)
+function handleRemoveDay(trainingDay) {
+  if (!trainingDay) return
+  removeDay(trainingDay.id)
 }
 
 function handleRemoveExercise(dayId, exerciseId) {
@@ -58,42 +67,47 @@ function openFullView() {
         Add <strong>{{ addExercise.name }}</strong> to:
       </div>
 
-      <div class="days-list" v-if="trainingDays.length">
-        <div v-for="day in trainingDays" :key="day.id" class="day-block">
-          <div class="day-header">
-            <div class="day-info">
-              <span class="day-name">{{ day.name }}</span>
-              <span class="day-label">{{ days.find(d => d.value === day.day)?.label }}</span>
-            </div>
-            <div class="day-actions">
-              <button v-if="addExercise" class="btn-add" @click="handleAddExercise(day.id)">+ Add</button>
-              <button class="btn-remove" @click="handleRemoveDay(day.id)" title="Remove day">×</button>
-            </div>
+      <div class="days-section">
+        <div v-for="day in configuredDays" :key="day.value" class="day-row">
+          <div class="day-tag" :class="{ active: day.configured, editing: editingDay === day.value }">
+            <span class="dot"></span>
+            <span class="label">{{ day.label.substring(0, 3) }}</span>
           </div>
-          <div class="day-exercises" v-if="day.exercises.length">
-            <div v-for="ex in day.exercises" :key="ex.exerciseId" class="exercise-row">
-              <span class="ex-order">{{ ex.order }}.</span>
-              <span class="ex-name">{{ ex.name }}</span>
-              <button v-if="!addExercise" class="btn-remove-ex" @click="handleRemoveExercise(day.id, ex.exerciseId)">×</button>
-            </div>
-          </div>
-          <div v-else class="empty-day">No exercises yet</div>
-        </div>
-      </div>
-      <div v-else class="empty">No training days yet</div>
 
-      <div v-if="showAddDay" class="add-day-form">
-        <select v-model="selectedDay" class="day-select">
-          <option v-for="d in days" :key="d.value" :value="d.value">{{ d.label }}</option>
-        </select>
-        <input v-model="newDayName" class="day-input" placeholder="Day name (e.g. Push)" @keyup.enter="handleAddDay" />
-        <button class="btn-save" @click="handleAddDay">Save</button>
+          <div class="day-content">
+            <template v-if="editingDay === day.value">
+              <input
+                v-model="newName"
+                class="name-input"
+                placeholder="Name (e.g. Push)"
+                @keyup.enter="saveDay(day)"
+                autofocus
+              />
+              <button class="save-btn" @click="saveDay(day)">Save</button>
+            </template>
+
+            <template v-else-if="day.configured">
+              <span class="day-name">{{ day.trainingDay.name }}</span>
+              <div class="day-exercises" v-if="day.trainingDay.exercises.length">
+                <span v-for="ex in day.trainingDay.exercises" :key="ex.exerciseId" class="mini-ex">
+                  {{ ex.name }}
+                  <button v-if="!addExercise" class="rm-ex" @click="handleRemoveExercise(day.trainingDay.id, ex.exerciseId)">×</button>
+                </span>
+              </div>
+              <div class="day-actions">
+                <button v-if="addExercise" class="add-btn" @click="handleAddExercise(day.trainingDay.id)">+ Add here</button>
+                <button class="rm-day" @click="handleRemoveDay(day.trainingDay)" title="Remove day">Remove</button>
+              </div>
+            </template>
+
+            <template v-else>
+              <button class="config-btn" @click="startEditing(day)">+ Set name</button>
+            </template>
+          </div>
+        </div>
       </div>
 
       <div class="panel-footer">
-        <button class="btn-new-day" @click="showAddDay = !showAddDay">
-          {{ showAddDay ? 'Cancel' : '+ New Day' }}
-        </button>
         <button class="btn-full" @click="openFullView">View Full Program</button>
       </div>
     </div>
@@ -142,138 +156,157 @@ function openFullView() {
   border-bottom: 1px solid #d0e3f7;
   font-size: 14px;
 }
-.days-list {
+.days-section {
   flex: 1;
-  padding: 12px 20px;
+  padding: 16px 20px;
 }
-.day-block {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.day-header {
+.day-row {
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.day-tag {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 10px 14px;
-  background: #fafafa;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.day-tag.active {
+  border-color: #4a90d9;
+  background: #4a90d9;
+}
+.day-tag.active .dot {
+  background: white;
+}
+.day-tag.active .label {
+  color: white;
+}
+.day-tag.editing {
+  border-color: #f0a030;
+  background: #f0a030;
+}
+.day-tag.editing .dot {
+  background: white;
+}
+.day-tag.editing .label {
+  color: white;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  margin-bottom: 2px;
+}
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
+}
+.day-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+.name-input {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 140px;
+  margin-right: 6px;
+}
+.save-btn {
+  padding: 6px 14px;
+  background: #f0a030;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
 }
 .day-name {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
 }
-.day-label {
+.day-exercises {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.mini-ex {
+  background: #f0f4f8;
+  padding: 2px 8px;
+  border-radius: 10px;
   font-size: 11px;
-  color: #999;
-  margin-left: 8px;
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.rm-ex {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.rm-ex:hover {
+  color: #e44;
 }
 .day-actions {
   display: flex;
-  gap: 6px;
-  align-items: center;
-}
-.btn-add {
-  padding: 4px 12px;
-  background: #4a90d9;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.btn-remove {
-  background: none;
-  border: none;
-  color: #ccc;
-  font-size: 18px;
-  cursor: pointer;
-}
-.btn-remove:hover {
-  color: #e44;
-}
-.day-exercises {
-  padding: 6px 14px 10px;
-}
-.exercise-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 0;
-  font-size: 13px;
-}
-.ex-order {
-  color: #999;
-  font-size: 12px;
-  min-width: 20px;
-}
-.ex-name {
-  flex: 1;
-  text-transform: capitalize;
-}
-.btn-remove-ex {
-  background: none;
-  border: none;
-  color: #ccc;
-  font-size: 16px;
-  cursor: pointer;
-}
-.btn-remove-ex:hover {
-  color: #e44;
-}
-.empty-day {
-  padding: 8px 14px;
-  color: #bbb;
-  font-size: 13px;
-  font-style: italic;
-}
-.empty {
-  padding: 20px;
-  color: #999;
-  text-align: center;
-}
-.add-day-form {
-  padding: 12px 20px;
-  display: flex;
   gap: 8px;
-  border-top: 1px solid #eee;
+  margin-top: 2px;
 }
-.day-select {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
-}
-.day-input {
-  flex: 1;
-  padding: 8px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
-}
-.btn-save {
-  padding: 8px 16px;
+.add-btn {
+  padding: 3px 12px;
   background: #4a90d9;
   color: white;
   border: none;
   border-radius: 4px;
+  font-size: 12px;
   cursor: pointer;
-  font-size: 13px;
+}
+.rm-day {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+}
+.rm-day:hover {
+  color: #e44;
+}
+.config-btn {
+  padding: 4px 12px;
+  background: none;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #999;
+}
+.config-btn:hover {
+  border-color: #4a90d9;
+  color: #4a90d9;
 }
 .panel-footer {
   padding: 12px 20px;
   border-top: 1px solid #eee;
   display: flex;
-  gap: 8px;
-}
-.btn-new-day {
-  padding: 8px 16px;
-  border: 2px dashed #ddd;
-  background: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #666;
 }
 .btn-full {
   padding: 8px 16px;

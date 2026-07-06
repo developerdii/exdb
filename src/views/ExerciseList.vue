@@ -68,7 +68,7 @@ function goBack() {
         v-model="searchQuery"
         type="text"
         class="search-input"
-        placeholder="Search exercises..."
+        :placeholder="t('searchPlaceholder')"
       />
     </div>
 

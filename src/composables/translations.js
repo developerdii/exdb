@@ -15,6 +15,7 @@ export const translations = {
     waist: 'Waist',
     upperLegs: 'Upper Legs',
     lowerLegs: 'Lower Legs',
+    searchPlaceholder: 'Search exercises...',
   },
   it: {
     selectBodyPart: 'Seleziona una parte del corpo',
@@ -32,6 +33,7 @@ export const translations = {
     waist: 'Vita',
     upperLegs: 'Cosce',
     lowerLegs: 'Polpacci',
+    searchPlaceholder: 'Cerca esercizi...',
   },
   tr: {
     selectBodyPart: 'Bir vücut bölümü seçin',
@@ -49,6 +51,7 @@ export const translations = {
     waist: 'Bel',
     upperLegs: 'Üst Bacaklar',
     lowerLegs: 'Alt Bacaklar',
+    searchPlaceholder: 'Egzersiz ara...',
   },
   es: {
     selectBodyPart: 'Selecciona una parte del cuerpo',
@@ -66,6 +69,7 @@ export const translations = {
     waist: 'Cintura',
     upperLegs: 'Muslos',
     lowerLegs: 'Pantorrillas',
+    searchPlaceholder: 'Buscar ejercicios...',
   },
   ru: {
     selectBodyPart: 'Выберите часть тела',
@@ -83,6 +87,7 @@ export const translations = {
     waist: 'Талия',
     upperLegs: 'Бедра',
     lowerLegs: 'Голени',
+    searchPlaceholder: 'Поиск упражнений...',
   },
   zh: {
     selectBodyPart: '选择身体部位',
@@ -100,5 +105,6 @@ export const translations = {
     waist: '腰部',
     upperLegs: '大腿',
     lowerLegs: '小腿',
+    searchPlaceholder: '搜索练习...',
   },
 }

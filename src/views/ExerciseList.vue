@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLocale } from '../composables/useLocale'
 import exercises from '../data/exercises.json'
@@ -11,6 +11,7 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const { t } = useLocale()
+const addToTraining = inject('addToTraining')
 
 const searchQuery = ref('')
 
@@ -109,10 +110,15 @@ function goBack() {
         class="card"
         @click="viewDetails(ex.id)"
       >
-        <h3>{{ ex.name }}</h3>
-        <div class="tags">
-          <span class="tag" @click.stop="viewTag(ex.target)">{{ ex.target }}</span>
-          <span class="tag tag-alt" @click.stop="viewTag(ex.muscle_group)">{{ ex.muscle_group }}</span>
+        <div class="card-row">
+          <div class="card-info">
+            <h3>{{ ex.name }}</h3>
+            <div class="tags">
+              <span class="tag" @click.stop="viewTag(ex.target)">{{ ex.target }}</span>
+              <span class="tag tag-alt" @click.stop="viewTag(ex.muscle_group)">{{ ex.muscle_group }}</span>
+            </div>
+          </div>
+          <button class="plus-btn" @click.stop="addToTraining(ex)" title="Add to training">+</button>
         </div>
       </div>
     </div>
@@ -187,9 +193,39 @@ h1 {
 .card:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
 .card h3 {
   margin: 0 0 8px;
   text-transform: capitalize;
+}
+.plus-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #4a90d9;
+  background: white;
+  color: #4a90d9;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.plus-btn:hover {
+  background: #4a90d9;
+  color: white;
 }
 .tags {
   display: flex;

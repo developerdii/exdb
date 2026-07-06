@@ -1,4 +1,5 @@
 <script setup>
+import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocale } from '../composables/useLocale'
 import exercises from '../data/exercises.json'
@@ -6,6 +7,7 @@ import exercises from '../data/exercises.json'
 const props = defineProps({ id: { type: String, default: '' } })
 const router = useRouter()
 const { locale, t } = useLocale()
+const addToTraining = inject('addToTraining')
 
 const exercise = exercises.find(e => e.id === props.id)
 
@@ -21,7 +23,10 @@ function viewTag(tag) {
 <template>
   <div class="details" v-if="exercise">
     <button class="back" @click="goBack">&larr; {{ t('back') }}</button>
-    <h1>{{ exercise.name }}</h1>
+    <div class="title-row">
+      <h1>{{ exercise.name }}</h1>
+      <button class="plus-btn" @click="addToTraining(exercise)" title="Add to training">+</button>
+    </div>
 
     <p class="toptags">
       <span class="toptag tlink" @click="router.push({ name: 'ExerciseList', params: { bodyPart: exercise.body_part } })">{{ exercise.body_part }}</span>
@@ -67,7 +72,34 @@ function viewTag(tag) {
 }
 h1 {
   text-transform: capitalize;
+  margin: 0;
+}
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
+}
+.plus-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #4a90d9;
+  background: white;
+  color: #4a90d9;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.plus-btn:hover {
+  background: #4a90d9;
+  color: white;
 }
 .toptags {
   display: flex;

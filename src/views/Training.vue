@@ -66,7 +66,7 @@ function getDayLabel(dayValue) {
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #4a90d9;
+  color: var(--text-link);
   padding: 8px 0;
 }
 h1 {
@@ -86,7 +86,7 @@ h1 {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #4a90d9;
+  background: var(--primary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -107,8 +107,9 @@ h1 {
 }
 .day-info {
   flex: 1;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 10px;
+  background: var(--bg-card);
   overflow: hidden;
 }
 .day-header {
@@ -116,8 +117,8 @@ h1 {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #eee;
+  background: var(--bg-muted);
+  border-bottom: 1px solid var(--border-light);
 }
 .day-header h2 {
   margin: 0;
@@ -125,18 +126,18 @@ h1 {
 }
 .day-full-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
 }
 .btn-remove {
   margin-left: auto;
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-dim);
   font-size: 20px;
   cursor: pointer;
 }
 .btn-remove:hover {
-  color: #e44;
+  color: var(--danger);
 }
 .exercises {
   padding: 8px 16px 12px;
@@ -146,7 +147,7 @@ h1 {
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--border-light);
 }
 .ex-row:last-child {
   border-bottom: none;
@@ -155,7 +156,7 @@ h1 {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
   font-size: 11px;
   font-weight: 700;
@@ -172,22 +173,22 @@ h1 {
 .btn-rm-ex {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-dim);
   font-size: 16px;
   cursor: pointer;
 }
 .btn-rm-ex:hover {
-  color: #e44;
+  color: var(--danger);
 }
 .no-ex {
   padding: 12px 16px;
-  color: #bbb;
+  color: var(--text-dim);
   font-size: 13px;
   font-style: italic;
 }
 .empty {
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   padding: 40px 0;
 }
 </style>

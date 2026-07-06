@@ -137,7 +137,7 @@ function goBack() {
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #4a90d9;
+  color: var(--text-link);
   padding: 8px 0;
 }
 h1 {
@@ -152,17 +152,18 @@ h1 {
 }
 .filter-btn {
   padding: 8px 16px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-input);
   border-radius: 20px;
-  background: white;
+  background: var(--bg-card);
+  color: var(--text);
   cursor: pointer;
   text-transform: capitalize;
   transition: all 0.2s;
 }
 .filter-btn.active {
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
-  border-color: #4a90d9;
+  border-color: var(--primary);
 }
 .search-bar {
   margin-bottom: 20px;
@@ -170,14 +171,19 @@ h1 {
 .search-input {
   width: 100%;
   padding: 10px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 15px;
   outline: none;
+  background: var(--bg-card);
+  color: var(--text);
   transition: border-color 0.2s;
 }
 .search-input:focus {
-  border-color: #4a90d9;
+  border-color: var(--primary);
+}
+.search-input::placeholder {
+  color: var(--text-muted);
 }
 .grid {
   display: grid;
@@ -185,13 +191,14 @@ h1 {
 }
 .card {
   padding: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
+  background: var(--bg-card);
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
 .card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .card-row {
   display: flex;
@@ -210,9 +217,9 @@ h1 {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #4a90d9;
-  background: white;
-  color: #4a90d9;
+  border: 2px solid var(--primary);
+  background: var(--bg-card);
+  color: var(--primary);
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
@@ -224,7 +231,7 @@ h1 {
   line-height: 1;
 }
 .plus-btn:hover {
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
 }
 .tags {
@@ -233,8 +240,8 @@ h1 {
   flex-wrap: wrap;
 }
 .tag {
-  background: #e8f0fe;
-  color: #4a90d9;
+  background: var(--bg-tag-blue);
+  color: var(--primary);
   padding: 2px 10px;
   border-radius: 12px;
   font-size: 12px;
@@ -243,11 +250,11 @@ h1 {
   transition: background 0.15s;
 }
 .tag:hover {
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
 }
 .tag-alt {
-  background: #f0e8f8;
+  background: var(--bg-tag-purple);
   color: #7c5cbf;
 }
 .tag-alt:hover {
@@ -256,6 +263,6 @@ h1 {
 }
 .empty {
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
 }
 </style>

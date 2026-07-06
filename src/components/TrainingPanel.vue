@@ -131,7 +131,7 @@ function openFullView() {
 .panel {
   width: 100%;
   max-width: 420px;
-  background: #fff;
+  background: var(--bg-card);
   height: 100%;
   overflow-y: auto;
   display: flex;
@@ -142,7 +142,7 @@ function openFullView() {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 .panel-header h2 {
   margin: 0;
@@ -153,12 +153,12 @@ function openFullView() {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: var(--text-muted);
 }
 .add-notice {
   padding: 12px 20px;
-  background: #f0f7ff;
-  border-bottom: 1px solid #d0e3f7;
+  background: var(--bg-notice);
+  border-bottom: 1px solid var(--border-light);
   font-size: 14px;
 }
 .days-section {
@@ -175,7 +175,7 @@ function openFullView() {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -184,8 +184,8 @@ function openFullView() {
   transition: all 0.15s;
 }
 .day-tag.active {
-  border-color: #4a90d9;
-  background: #4a90d9;
+  border-color: var(--primary);
+  background: var(--primary);
 }
 .day-tag.active .dot {
   background: white;
@@ -207,13 +207,13 @@ function openFullView() {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ccc;
+  background: var(--text-dim);
   margin-bottom: 2px;
 }
 .label {
   font-size: 10px;
   font-weight: 700;
-  color: #999;
+  color: var(--text-muted);
 }
 .day-content {
   flex: 1;
@@ -222,11 +222,16 @@ function openFullView() {
 }
 .name-input {
   padding: 6px 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-input);
   border-radius: 4px;
   font-size: 13px;
+  background: var(--bg-card);
+  color: var(--text);
   width: 140px;
   margin-right: 6px;
+}
+.name-input::placeholder {
+  color: var(--text-muted);
 }
 .save-btn {
   padding: 6px 14px;
@@ -250,7 +255,7 @@ function openFullView() {
   margin-bottom: 4px;
 }
 .mini-ex {
-  background: #f0f4f8;
+  background: var(--bg-tag);
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 11px;
@@ -262,14 +267,14 @@ function openFullView() {
 .rm-ex {
   background: none;
   border: none;
-  color: #bbb;
+  color: var(--text-dim);
   font-size: 13px;
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 .rm-ex:hover {
-  color: #e44;
+  color: var(--danger);
 }
 .day-actions {
   display: flex;
@@ -278,7 +283,7 @@ function openFullView() {
 }
 .add-btn {
   padding: 3px 12px;
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -288,35 +293,35 @@ function openFullView() {
 .rm-day {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-dim);
   font-size: 12px;
   cursor: pointer;
 }
 .rm-day:hover {
-  color: #e44;
+  color: var(--danger);
 }
 .config-btn {
   padding: 4px 12px;
   background: none;
-  border: 1px dashed #ccc;
+  border: 1px dashed var(--border-input);
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
-  color: #999;
+  color: var(--text-muted);
 }
 .config-btn:hover {
-  border-color: #4a90d9;
-  color: #4a90d9;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 .panel-footer {
   padding: 12px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-light);
   display: flex;
 }
 .btn-full {
   padding: 8px 16px;
-  background: #333;
-  color: white;
+  background: var(--text);
+  color: var(--bg);
   border: none;
   border-radius: 6px;
   cursor: pointer;

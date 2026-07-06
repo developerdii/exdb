@@ -67,7 +67,7 @@ function viewTag(tag) {
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #4a90d9;
+  color: var(--text-link);
   padding: 8px 0;
 }
 h1 {
@@ -84,9 +84,9 @@ h1 {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid #4a90d9;
-  background: white;
-  color: #4a90d9;
+  border: 2px solid var(--primary);
+  background: var(--bg-card);
+  color: var(--primary);
   font-size: 22px;
   font-weight: 700;
   cursor: pointer;
@@ -98,7 +98,7 @@ h1 {
   line-height: 1;
 }
 .plus-btn:hover {
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
 }
 .toptags {
@@ -107,25 +107,25 @@ h1 {
   margin-bottom: 16px;
 }
 .toptag {
-  background: #f0f0f0;
+  background: var(--bg-tag);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 13px;
   text-transform: capitalize;
 }
 .tlink {
-  background: #e8f0fe;
-  color: #4a90d9;
+  background: var(--bg-tag-blue);
+  color: var(--primary);
   cursor: pointer;
   transition: background 0.15s;
 }
 .tlink:hover {
-  background: #4a90d9;
+  background: var(--primary);
   color: white;
 }
 .instructions {
   line-height: 1.6;
-  color: #333;
+  color: var(--text);
   margin-bottom: 20px;
 }
 .steps {

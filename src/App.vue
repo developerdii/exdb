@@ -1,6 +1,8 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { useLocale } from './composables/useLocale'
 
+const router = useRouter()
 const { locale, setLocale } = useLocale()
 
 const languages = [
@@ -15,7 +17,7 @@ const languages = [
 
 <template>
   <nav class="navbar">
-    <span class="brand">ExDB</span>
+    <span class="brand" @click="router.push('/')">ExDB</span>
     <select v-model="locale" @change="setLocale(locale)" class="lang-select">
       <option v-for="l in languages" :key="l.code" :value="l.code">{{ l.flag }} {{ l.name }}</option>
     </select>
@@ -44,6 +46,7 @@ const languages = [
   font-weight: 800;
   color: #4a90d9;
   letter-spacing: 1px;
+  cursor: pointer;
 }
 .lang-select {
   padding: 6px 10px;

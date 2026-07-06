@@ -12,6 +12,11 @@ const emit = defineEmits(['close', 'added'])
 const router = useRouter()
 const { trainingDays, days, addDay, removeDay, addExerciseToDay, removeExerciseFromDay } = useTraining()
 
+const sortedDays = computed(() => {
+  const order = days.map(d => d.value)
+  return [...trainingDays.value].sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day))
+})
+
 const editingDay = ref(null)
 const newName = ref('')
 

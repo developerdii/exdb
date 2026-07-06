@@ -1,9 +1,15 @@
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTraining } from '../composables/useTraining'
 
 const router = useRouter()
 const { trainingDays, days, removeDay, removeExerciseFromDay } = useTraining()
+
+const sortedDays = computed(() => {
+  const order = days.map(d => d.value)
+  return [...trainingDays.value].sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day))
+})
 
 function goBack() {
   router.push('/')
@@ -19,8 +25,8 @@ function getDayLabel(dayValue) {
     <button class="back" @click="goBack">&larr; Back</button>
     <h1>Training Program</h1>
 
-    <div v-if="trainingDays.length" class="days-list">
-      <div v-for="day in trainingDays" :key="day.id" class="day-block">
+    <div v-if="sortedDays.length" class="days-list">
+      <div v-for="day in sortedDays" :key="day.id" class="day-block">
         <div class="day-tag">
           <span class="dot"></span>
           <span class="label">{{ getDayLabel(day.day).substring(0, 3) }}</span>

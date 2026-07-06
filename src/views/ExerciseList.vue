@@ -196,7 +196,7 @@ h1 {
 .card-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 .card-info {
   flex: 1;

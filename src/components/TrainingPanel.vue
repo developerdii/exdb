@@ -10,15 +10,15 @@ const props = defineProps({
 const emit = defineEmits(['close', 'added'])
 
 const router = useRouter()
-const { trainingDays, days, addDay, removeDay, addExerciseToDay, removeExerciseFromDay } = useTraining()
-
-const sortedDays = computed(() => {
-  const order = days.map(d => d.value)
-  return [...trainingDays.value].sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day))
-})
+const {
+  trainingDays, days, addDay, removeDay, addExerciseToDay, removeExerciseFromDay,
+  updateSetReps, updateSetWeight, addSetToExercise, removeSet,
+} = useTraining()
 
 const editingDay = ref(null)
 const newName = ref('')
+const setsCount = ref(3)
+const expandedEx = ref({}) // dayId_exerciseId -> boolean
 
 const configuredDays = computed(() => {
   return days.map(d => {
@@ -26,6 +26,15 @@ const configuredDays = computed(() => {
     return { ...d, configured: !!existing, trainingDay: existing }
   })
 })
+
+function expandKey(dayId, exId) {
+  return dayId + '_' + exId
+}
+
+function toggleExpand(dayId, exId) {
+  const key = expandKey(dayId, exId)
+  expandedEx.value[key] = !expandedEx.value[key]
+}
 
 function startEditing(day) {
   editingDay.value = day.value
@@ -41,7 +50,8 @@ function saveDay(day) {
 
 function handleAddExercise(dayId) {
   if (!props.addExercise) return
-  addExerciseToDay(dayId, props.addExercise)
+  addExerciseToDay(dayId, props.addExercise, setsCount.value)
+  setsCount.value = 3
   emit('added')
 }
 
@@ -52,6 +62,18 @@ function handleRemoveDay(trainingDay) {
 
 function handleRemoveExercise(dayId, exerciseId) {
   removeExerciseFromDay(dayId, exerciseId)
+}
+
+function exerciseSummary(ex) {
+  if (!ex.sets) return ''
+  const filledSets = ex.sets.filter(s => s.reps !== null)
+  if (!filledSets.length) return `${ex.sets.length} sets`
+  const parts = filledSets.map(s => {
+    let str = `${s.reps || '-'}`
+    if (s.weight) str += ` × ${s.weight}kg`
+    return str
+  })
+  return parts.join(' / ')
 }
 
 function openFullView() {
@@ -69,7 +91,13 @@ function openFullView() {
       </div>
 
       <div v-if="addExercise" class="add-notice">
-        Add <strong>{{ addExercise.name }}</strong> to:
+        <div>Add <strong>{{ addExercise.name }}</strong> to:</div>
+        <div class="set-picker">
+          <label>Sets:</label>
+          <button class="set-btn" @click="setsCount = Math.max(1, setsCount - 1)">−</button>
+          <span class="set-val">{{ setsCount }}</span>
+          <button class="set-btn" @click="setsCount = Math.min(10, setsCount + 1)">+</button>
+        </div>
       </div>
 
       <div class="days-section">
@@ -94,10 +122,51 @@ function openFullView() {
             <template v-else-if="day.configured">
               <span class="day-name">{{ day.trainingDay.name }}</span>
               <div class="day-exercises" v-if="day.trainingDay.exercises.length">
-                <span v-for="ex in day.trainingDay.exercises" :key="ex.exerciseId" class="mini-ex">
-                  {{ ex.name }}
-                  <button v-if="!addExercise" class="rm-ex" @click="handleRemoveExercise(day.trainingDay.id, ex.exerciseId)">×</button>
-                </span>
+                <div v-for="ex in day.trainingDay.exercises" :key="ex.exerciseId" class="mini-ex-wrap">
+                  <div class="mini-ex-header">
+                    <span class="mini-ex-name">{{ ex.name }}</span>
+                    <button
+                      class="mini-ex-toggle"
+                      @click="toggleExpand(day.trainingDay.id, ex.exerciseId)"
+                    >
+                      {{ expandedEx[expandKey(day.trainingDay.id, ex.exerciseId)] ? '▼' : '▶' }}
+                    </button>
+                    <button v-if="!addExercise" class="rm-ex" @click="handleRemoveExercise(day.trainingDay.id, ex.exerciseId)">×</button>
+                  </div>
+                  <span class="mini-ex-summary">{{ exerciseSummary(ex) }}</span>
+
+                  <!-- Expanded set editor -->
+                  <div v-if="expandedEx[expandKey(day.trainingDay.id, ex.exerciseId)]" class="sets-editor">
+                    <div class="set-row" v-for="(s, si) in ex.sets" :key="si">
+                      <span class="set-label">Set {{ si + 1 }}</span>
+                      <input
+                        type="number"
+                        class="set-input"
+                        min="0"
+                        placeholder="Reps"
+                        :value="s.reps"
+                        @input="updateSetReps(day.trainingDay.id, ex.exerciseId, si, $event.target.value)"
+                      />
+                      <span class="set-sep">×</span>
+                      <input
+                        type="number"
+                        class="set-input weight-input"
+                        min="0"
+                        step="0.5"
+                        placeholder="kg"
+                        :value="s.weight"
+                        @input="updateSetWeight(day.trainingDay.id, ex.exerciseId, si, $event.target.value)"
+                      />
+                      <span class="set-unit">kg</span>
+                      <button
+                        v-if="ex.sets.length > 1"
+                        class="btn-rm-set"
+                        @click="removeSet(day.trainingDay.id, ex.exerciseId, si)"
+                      >×</button>
+                    </div>
+                    <button class="btn-add-set" @click="addSetToExercise(day.trainingDay.id, ex.exerciseId)">+ Add set</button>
+                  </div>
+                </div>
               </div>
               <div class="day-actions">
                 <button v-if="addExercise" class="add-btn" @click="handleAddExercise(day.trainingDay.id)">+ Add here</button>
@@ -160,6 +229,42 @@ function openFullView() {
   background: var(--bg-notice);
   border-bottom: 1px solid var(--border-light);
   font-size: 14px;
+}
+.set-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.set-picker label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.set-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-input);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.set-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.set-val {
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 20px;
+  text-align: center;
 }
 .days-section {
   flex: 1;
@@ -250,36 +355,145 @@ function openFullView() {
 }
 .day-exercises {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 4px;
 }
-.mini-ex {
+.mini-ex-wrap {
   background: var(--bg-tag);
-  padding: 2px 8px;
+  padding: 6px 8px;
   border-radius: 10px;
   font-size: 11px;
-  text-transform: capitalize;
-  display: inline-flex;
+}
+.mini-ex-header {
+  display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+}
+.mini-ex-name {
+  text-transform: capitalize;
+  font-weight: 600;
+  font-size: 12px;
+  flex: 1;
+}
+.mini-ex-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.mini-ex-toggle:hover {
+  color: var(--primary);
 }
 .rm-ex {
   background: none;
   border: none;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 0;
+  padding: 0 2px;
   line-height: 1;
 }
 .rm-ex:hover {
   color: var(--danger);
 }
+.mini-ex-summary {
+  color: var(--text-muted);
+  font-size: 10px;
+  display: block;
+  margin-top: 2px;
+}
+.sets-editor {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.set-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  width: 34px;
+  flex-shrink: 0;
+}
+.set-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 2px solid var(--border-input);
+  border-radius: 4px;
+  font-size: 12px;
+  background: var(--bg-card);
+  color: var(--text);
+  outline: none;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.set-input:focus {
+  border-color: var(--primary);
+}
+.set-input::placeholder {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+/* Hide number spinners */
+.set-input::-webkit-outer-spin-button,
+.set-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.set-input[type=number] {
+  -moz-appearance: textfield;
+}
+.weight-input {
+  width: 45px;
+}
+.set-sep {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.set-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.btn-rm-set {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.btn-rm-set:hover {
+  color: var(--danger);
+}
+.btn-add-set {
+  background: none;
+  border: 1px dashed var(--border-input);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  margin-top: 2px;
+}
+.btn-add-set:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
 .day-actions {
   display: flex;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .add-btn {
   padding: 3px 12px;
